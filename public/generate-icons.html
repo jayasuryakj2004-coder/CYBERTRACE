@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Icon Generator</title>
+  <style>
+    canvas { border: 1px solid #ccc; margin: 10px; }
+    button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>Generate Icons</h1>
+  <button onclick="generateAll()">Generate All Icons</button>
+  <div id="output"></div>
+  
+  <script>
+    const svgContent = `<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" rx="24" fill="#58a6ff"/>
+  <path d="M32 48h64M32 64h48M32 80h32" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="96" cy="80" r="16" stroke="white" stroke-width="6"/>
+  <path d="M96 72v16M88 80h16" stroke="white" stroke-width="6" stroke-linecap="round"/>
+</svg>`;
+
+    async function generateAll() {
+      const sizes = [16, 48, 128];
+      const output = document.getElementById('output');
+      output.innerHTML = '';
+      
+      for (const size of sizes) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        
+        const img = new Image();
+        img.src = 'data:image/svg+xml;base64,' + btoa(svgContent);
+        
+        await new Promise(resolve => {
+          img.onload = () => {
+            ctx.drawImage(img, 0, 0, size, size);
+            canvas.toBlob(blob => {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `icon-${size}.png`;
+              a.textContent = `Download icon-${size}.png`;
+              a.style.display = 'block';
+              output.appendChild(a);
+              resolve();
+            });
+          };
+        });
+      }
+      
+      // Also create the SVG as a downloadable file
+      const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+      const svgLink = document.createElement('a');
+      svgLink.href = svgUrl;
+      svgLink.download = 'icon.svg';
+      svgLink.textContent = 'Download icon.svg';
+      svgLink.style.display = 'block';
+      output.appendChild(svgLink);
+    }
+  </script>
+</body>
+</html>

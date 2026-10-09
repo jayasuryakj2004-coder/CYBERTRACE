@@ -1,0 +1,33 @@
+=== CyberTrace Evaluation Summary ===
+Threshold: 50
+Evaluated samples: 12 / 15
+Failed scans: 1 (6.7%)
+Incomplete scans: 1 (6.7%)
+Unknown labels: 1
+
+Confusion Matrix:
+  TP=6 TN=6 FP=0 FN=0
+
+Metrics:
+  Precision: 1.0000
+  Recall: 1.0000
+  F1 Score: 1.0000
+  Accuracy: 1.0000
+  False Positive Rate: 0.0000
+  False Negative Rate: 0.0000
+
+Per-Indicator Performance:
+  metadata_anomaly: TP=12 FP=0 FN=0 P=1.0000 R=1.0000 F1=1.0000
+  uri: TP=3 FP=0 FN=0 P=1.0000 R=1.0000 F1=1.0000
+  form: TP=1 FP=0 FN=0 P=1.0000 R=1.0000 F1=1.0000
+  javascript: TP=5 FP=0 FN=0 P=1.0000 R=1.0000 F1=1.0000
+  open_action: TP=5 FP=0 FN=0 P=1.0000 R=1.0000 F1=1.0000
+  embedded_file: TP=1 FP=0 FN=0 P=1.0000 R=1.0000 F1=1.0000
+  launch_action: TP=1 FP=0 FN=0 P=1.0000 R=1.0000 F1=1.0000
+  suspicious_uri: TP=1 FP=0 FN=0 P=1.0000 R=1.0000 F1=1.0000
+  additional_action: TP=1 FP=0 FN=0 P=1.0000 R=1.0000 F1=1.0000
+  encryption: TP=1 FP=0 FN=0 P=1.0000 R=1.0000 F1=1.0000
+  incremental_update: TP=1 FP=0 FN=0 P=1.0000 R=1.0000 F1=1.0000
+
+Failed scan errors:
+  edge-001: Not a valid PDF: missing %PDF- header

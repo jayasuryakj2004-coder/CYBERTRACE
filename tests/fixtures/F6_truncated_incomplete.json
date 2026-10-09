@@ -1,0 +1,98 @@
+{
+  "fixtureId": "F6",
+  "name": "truncated_incomplete",
+  "findings": [
+    {
+      "findingId": "F6-1",
+      "category": "structural_anomalies",
+      "text": "bad startxref, multiple %%EOF, data after EOF, /Prev chain",
+      "severity": "medium"
+    }
+  ],
+  "expected": {
+    "scanStatus": "incomplete",
+    "confidence": "0.38",
+    "categories": {
+      "identity_integrity": {
+        "rating": "not_assessed",
+        "observations": [],
+        "interpretation": "Header, extension, hash, or corruption indicators were not observed or were not checked.",
+        "combinationNotes": null
+      },
+      "structural_anomalies": {
+        "rating": "medium",
+        "observations": [
+          {
+            "findingId": "F6-1",
+            "text": "bad startxref, multiple %%EOF, data after EOF, /Prev chain"
+          }
+        ],
+        "interpretation": "Observed indicators in this category suggest a medium concern but should be interpreted as evidence, not proof.",
+        "combinationNotes": null
+      },
+      "active_content": {
+        "rating": "not_assessed",
+        "observations": [],
+        "interpretation": "Active document behaviors were not observed or were not checked.",
+        "combinationNotes": null
+      },
+      "embedded_payloads": {
+        "rating": "not_assessed",
+        "observations": [],
+        "interpretation": "Embedded payload indicators were not observed or were not checked.",
+        "combinationNotes": null
+      },
+      "links_destinations": {
+        "rating": "not_assessed",
+        "observations": [],
+        "interpretation": "Destination and link indicators were not observed or were not checked.",
+        "combinationNotes": null
+      },
+      "social_engineering": {
+        "rating": "not_assessed",
+        "observations": [],
+        "interpretation": "Social-engineering indicators were not observed or were not checked.",
+        "combinationNotes": null
+      },
+      "hidden_deceptive_content": {
+        "rating": "not_assessed",
+        "observations": [],
+        "interpretation": "Hidden or deceptive content indicators were not observed or were not checked.",
+        "combinationNotes": null
+      },
+      "metadata_provenance": {
+        "rating": "not_assessed",
+        "observations": [],
+        "interpretation": "Metadata provenance indicators were not observed or were not checked.",
+        "combinationNotes": null
+      },
+      "signature_behavior": {
+        "rating": "not_assessed",
+        "observations": [],
+        "interpretation": "Signature or sandbox behavior indicators were not observed or were not checked.",
+        "combinationNotes": null
+      },
+      "structure_anomalies": {
+        "rating": "not_assessed",
+        "observations": [],
+        "interpretation": "Structural integrity indicators were not observed or were not checked.",
+        "combinationNotes": null
+      }
+    },
+    "possiblyHidden": [
+      "Possible hidden file content after the last EOF",
+      "Additional objects or overlays may be absent from the partial read"
+    ],
+    "overall": {
+      "rating": "medium",
+      "summary": "This scan is incomplete and cannot be called clean.",
+      "isCleanClaim": false
+    }
+  },
+  "scanStatus": "incomplete",
+  "confidence": 0.38,
+  "possiblyHidden": [
+    "Possible hidden file content after the last EOF",
+    "Additional objects or overlays may be absent from the partial read"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "cybertrace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate-fixtures": "node tests/generate-fixtures.js",
+    "start": "node backend/api.js",
+    "start:backend": "node backend/api.js",
+    "dev": "node backend/api.js",
+    "test": "node --test tests/eval.test.js tests/report-smoke.test.js",
+    "test:report": "node tests/report-smoke.test.js",
+    "eval": "node tests/eval.js"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.7",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.10.38"
+  }
+}

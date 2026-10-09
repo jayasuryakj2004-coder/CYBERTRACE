@@ -1,0 +1,77 @@
+[
+  {
+    "name": "benign-ordinary.pdf",
+    "size": 592,
+    "sha256": "34ccfe46df012cca036742a5167174436b62eea4e4031bab5db88a5c0703e66d"
+  },
+  {
+    "name": "benign-link.pdf",
+    "size": 748,
+    "sha256": "1cccc65ef4ec3d6d62c480cbb10fcb4a4500dcccd10ea21d5846998e8d3a0cfe"
+  },
+  {
+    "name": "benign-form.pdf",
+    "size": 683,
+    "sha256": "b0ffbde5bf20eff1f759d75ef2f81219c3691ba2bfe4f384b2f8099cb3936967"
+  },
+  {
+    "name": "benign-metadata.pdf",
+    "size": 827,
+    "sha256": "4dbe024825c97d9414333f783f49eec17ed90723b266a33bb799320f1a0c66f1"
+  },
+  {
+    "name": "suspicious-javascript.pdf",
+    "size": 691,
+    "sha256": "6a58e80fef25a7354953cbd217650528033f2b25223c1c731c29a7f12b3c05f9"
+  },
+  {
+    "name": "suspicious-openaction.pdf",
+    "size": 698,
+    "sha256": "6f2394d3306f63d4b69b1029a74c1338196f1314d75ab9fd6db9185e21a20d33"
+  },
+  {
+    "name": "suspicious-embedded.pdf",
+    "size": 967,
+    "sha256": "1f03fe03d55606b618f42de8f6e2cf1ed8d72723afb390191bf31925b0ee7736"
+  },
+  {
+    "name": "suspicious-launch.pdf",
+    "size": 685,
+    "sha256": "857c0657485185642b7064df50fe902ccfa14db063dbefd176d34601ce1d23ad"
+  },
+  {
+    "name": "suspicious-uri.pdf",
+    "size": 1138,
+    "sha256": "5d25671d66ac5c182d603656b7a1ad52a0b3c682abddc8115863a91790ec907a"
+  },
+  {
+    "name": "suspicious-additional-action.pdf",
+    "size": 686,
+    "sha256": "c9077d7c26bb23a7c05355669973f54004ce034aa222b0e0a8965bf147eac6b6"
+  },
+  {
+    "name": "edge-malformed.pdf",
+    "size": 48,
+    "sha256": "8f8a6e83dfb4e708db8bc12fd0323b287b53762c8d38c287462b0ab42f7c7e0d"
+  },
+  {
+    "name": "edge-truncated.pdf",
+    "size": 236,
+    "sha256": "1d4764f5d5471a494e35be498c4692e6ae712c77cff3cb2fdbfc4f8f1d75a7d8"
+  },
+  {
+    "name": "edge-encrypted.pdf",
+    "size": 822,
+    "sha256": "08faeab69491beedf6618364b2c6a2e339ab309d87a77597bc7ca45904cb1dc9"
+  },
+  {
+    "name": "edge-no-metadata.pdf",
+    "size": 592,
+    "sha256": "34ccfe46df012cca036742a5167174436b62eea4e4031bab5db88a5c0703e66d"
+  },
+  {
+    "name": "edge-incremental.pdf",
+    "size": 960,
+    "sha256": "bd85e43995028c2d6d54434e287f33c1191cc8ecd226dee472a640c64d4a0dcc"
+  }
+]

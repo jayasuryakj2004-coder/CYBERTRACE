@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CyberTraceCategorization",
+  "type": "object",
+  "required": ["scanStatus", "confidence", "categories", "possiblyHidden", "overall"],
+  "additionalProperties": false,
+  "properties": {
+    "scanStatus": { "type": "string", "enum": ["complete", "incomplete", "failed"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "categories": {
+      "type": "object",
+      "required": [
+        "identity_integrity",
+        "structural_anomalies",
+        "active_content",
+        "embedded_payloads",
+        "links_destinations",
+        "social_engineering",
+        "hidden_deceptive_content",
+        "metadata_provenance",
+        "signature_behavior"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "identity_integrity": { "$ref": "#/$defs/category" },
+        "structural_anomalies": { "$ref": "#/$defs/category" },
+        "active_content": { "$ref": "#/$defs/category" },
+        "embedded_payloads": { "$ref": "#/$defs/category" },
+        "links_destinations": { "$ref": "#/$defs/category" },
+        "social_engineering": { "$ref": "#/$defs/category" },
+        "hidden_deceptive_content": { "$ref": "#/$defs/category" },
+        "metadata_provenance": { "$ref": "#/$defs/category" },
+        "signature_behavior": { "$ref": "#/$defs/category" }
+      }
+    },
+    "possiblyHidden": { "type": "array", "items": { "type": "string" } },
+    "overall": {
+      "type": "object",
+      "required": ["rating", "summary", "isCleanClaim"],
+      "additionalProperties": false,
+      "properties": {
+        "rating": { "type": "string", "enum": ["none", "info", "low", "medium", "high", "critical", "not_assessed"] },
+        "summary": { "type": "string" },
+        "isCleanClaim": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "category": {
+      "type": "object",
+      "required": ["rating", "observations", "interpretation", "combinationNotes"],
+      "additionalProperties": false,
+      "properties": {
+        "rating": { "type": "string", "enum": ["none", "info", "low", "medium", "high", "critical", "not_assessed"] },
+        "observations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/observation" }
+        },
+        "interpretation": { "type": "string" },
+        "combinationNotes": { "type": ["string", "null"] }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "required": ["findingId", "text"],
+      "additionalProperties": false,
+      "properties": {
+        "findingId": { "type": "string" },
+        "text": { "type": "string" }
+      }
+    }
+  }
+}

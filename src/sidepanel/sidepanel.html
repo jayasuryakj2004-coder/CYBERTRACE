@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberTrace — Forensic Dashboard</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header class="dashboard-header">
+    <div class="header-left">
+      <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="18" rx="2" ry="2"/>
+        <path d="M8 11h8M8 15h5M10 7h4"/>
+        <circle cx="12" cy="12" r="1"/>
+      </svg>
+      <h1>CyberTrace</h1>
+      <span class="version-badge">v3.0</span>
+    </div>
+    <div class="header-right">
+      <span id="connectionStatus" class="status-indicator offline">
+        <span class="dot"></span>
+        <span>AI Offline</span>
+      </span>
+      <button id="settingsBtn" class="icon-btn" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="dashboard-tabs">
+    <button class="tab-btn active" data-tab="overview">Overview</button>
+    <button class="tab-btn" data-tab="findings">Findings</button>
+    <button class="tab-btn" data-tab="risk">Risk</button>
+    <button class="tab-btn" data-tab="ai">AI Analyst</button>
+    <button class="tab-btn" data-tab="history">History</button>
+    <button class="tab-btn" data-tab="accuracy">Accuracy</button>
+  </div>
+
+  <main class="dashboard-content">
+    <section id="tab-overview" class="tab-panel active">
+      <div class="grid-2">
+        <div class="card">
+          <h2>Document</h2>
+          <dl class="info-list">
+            <dt>File</dt><dd id="docName">—</dd>
+            <dt>Size</dt><dd id="docSize">—</dd>
+            <dt>SHA-256</dt><dd id="docHash" class="mono">—</dd>
+            <dt>Source</dt><dd id="docUrl" class="url">—</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <h2>Scan Status</h2>
+          <dl class="info-list">
+            <dt>Scan ID</dt><dd id="scanId" class="mono">—</dd>
+            <dt>Started</dt><dd id="scanStarted">—</dd>
+            <dt>Completed</dt><dd id="scanCompleted">—</dd>
+            <dt>Status</dt><dd><span id="scanStatusBadge" class="status-badge">—</span></dd>
+            <dt>Coverage</dt><dd id="scanCoverage">—</dd>
+          </dl>
+          <div class="scan-progress"><div id="scanProgressFill"></div></div>
+          <button id="analyzeBtn" class="btn primary hidden">Run analysis</button>
+        </div>
+        <div class="card">
+          <h2>Metadata</h2>
+          <dl class="info-list">
+            <dt>PDF Version</dt><dd id="metaPdfVersion">—</dd>
+            <dt>Pages</dt><dd id="metaPageCount">—</dd>
+            <dt>Title</dt><dd id="metaTitle">—</dd>
+            <dt>Author</dt><dd id="metaAuthor">—</dd>
+            <dt>Creator</dt><dd id="metaCreator">—</dd>
+            <dt>Producer</dt><dd id="metaProducer">—</dd>
+            <dt>Created</dt><dd id="metaCreationDate">—</dd>
+            <dt>Modified</dt><dd id="metaModDate">—</dd>
+            <dt>Linearized</dt><dd id="metaLinearized">—</dd>
+            <dt>Encrypted</dt><dd id="metaEncrypted">—</dd>
+            <dt>Object Streams</dt><dd id="metaObjectStreams">—</dd>
+            <dt>Forms</dt><dd id="metaForms">—</dd>
+            <dt>Signatures</dt><dd id="metaSignatures">—</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <h2>Limitations</h2>
+          <ul id="limitationsList" class="limitations-list">
+            <li class="empty">No limitations recorded</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Recommended Next Steps</h2>
+          <ul id="nextSteps" class="limitations-list"><li>Waiting for scan results.</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-findings" class="tab-panel">
+      <div class="findings-toolbar">
+        <select id="findingFilter" class="filter-select">
+          <option value="all">All Categories</option>
+        </select>
+        <select id="severityFilter" class="filter-select">
+          <option value="all">All Severities</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+          <option value="info">Info</option>
+        </select>
+      </div>
+      <div id="findingsList" class="findings-container">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          <p>No findings detected</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-risk" class="tab-panel">
+      <div class="grid-2">
+        <div class="card risk-card">
+          <div class="risk-score">
+            <svg class="score-circle" viewBox="0 0 100 100">
+              <circle class="bg" cx="50" cy="50" r="45"/>
+              <circle class="fg" id="riskScoreCircle" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="283"/>
+            </svg>
+            <div class="score-text">
+              <span id="riskScoreValue" class="value">0</span>
+              <span class="max">/100</span>
+            </div>
+          </div>
+          <div class="risk-level">
+            <span class="label">Risk Level</span>
+            <span id="riskLevel" class="level none">None</span>
+          </div>
+          <div class="risk-bands">
+            <span class="band none" title="0-20">None</span>
+            <span class="band low" title="21-40">Low</span>
+            <span class="band medium" title="41-60">Medium</span>
+            <span class="band high" title="61-80">High</span>
+            <span class="band critical" title="81-100">Critical</span>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Contributing Factors</h2>
+          <div id="riskFactors" class="risk-factors">
+            <p class="empty">No risk factors identified</p>
+          </div>
+          <p class="risk-disclaimer">Indicators are observations, not confirmation of malicious behavior. CyberTrace does not block documents.</p>
+        </div>
+        <div class="card full-width">
+          <h2>Rule Weights</h2>
+          <div id="ruleWeights" class="rule-weights"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-ai" class="tab-panel">
+      <div class="grid-2">
+        <div class="card full-width">
+          <h2>AI Forensic Analysis</h2>
+          <div id="aiAnalysis" class="ai-analysis">
+            <div class="ai-status">
+              <button id="runAiAnalysis" class="btn primary" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Run AI Analysis
+              </button>
+              <span id="aiStatusText" class="status-text">Click to generate AI explanation</span>
+            </div>
+            <div id="aiResult" class="ai-result hidden">
+              <div class="ai-section">
+                <h3>Summary</h3>
+                <p id="aiSummary"></p>
+              </div>
+              <div class="ai-section">
+                <h3>Finding Explanations</h3>
+                <ul id="aiFindingsExplanation"></ul>
+              </div>
+              <div class="ai-section">
+                <h3>Possible Scenarios</h3>
+                <ul id="aiScenarios"></ul>
+              </div>
+              <div class="ai-section">
+                <h3>Recommended Actions</h3>
+                <ul id="aiActions"></ul>
+              </div>
+              <div class="ai-section">
+                <h3>Limitations</h3>
+                <ul id="aiLimitations"></ul>
+              </div>
+              <div class="ai-disclaimer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                <span>AI-generated interpretation. Grounded in scanner evidence only. Not a verdict.</span>
+              </div>
+            </div>
+            <div id="aiError" class="ai-error hidden"></div>
+            <p class="ai-fallback">Scanner rule explanations and evidence remain available in Findings when the optional AI service is unavailable.</p>
+          </div>
+        </div>
+        <div class="card full-width">
+          <h2>AI Analyst Chat</h2>
+          <div class="chat-container">
+            <div id="chatMessages" class="chat-messages">
+              <div class="message assistant">
+                <div class="avatar">AI</div>
+                <div class="content">
+                  <p>I'm your CyberTrace AI analyst. Ask me about specific findings, evidence, or investigation steps.</p>
+                  <p class="hint">Example: "Why was this PDF flagged?" or "What does the Launch action mean?"</p>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input">
+              <input type="text" id="chatInput" maxlength="500" placeholder="Ask about findings, evidence, or next steps..." disabled>
+              <button id="chatSend" class="btn primary" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-history" class="tab-panel">
+      <div class="card full-width">
+        <div class="history-toolbar">
+          <h2>Scan History</h2>
+          <div class="toolbar-actions">
+            <button id="exportHistoryBtn" class="btn secondary">Export PDF Report</button>
+            <button id="clearHistoryBtn" class="btn danger">Clear History</button>
+          </div>
+        </div>
+        <div id="historyList" class="history-list">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <p>No scan history</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-accuracy" class="tab-panel">
+      <div class="card full-width">
+        <h2>Evaluation Metrics</h2>
+        <div id="accuracyContent" class="accuracy-content">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <p>Loading evaluation results...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="dashboard-footer">
+    <div class="footer-actions">
+      <button id="exportJsonBtn" class="btn secondary" disabled>Export PDF Report</button>
+      <button id="retryScanBtn" class="btn primary hidden">Retry Scan</button>
+    </div>
+    <div class="footer-info">
+      <span>CyberTrace v3.0</span>
+      <span id="ruleVersion">Rules: 2.0.0</span>
+    </div>
+  </footer>
+
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Settings</h2>
+      <div class="setting">
+        <label>AI mode</label>
+        <input type="text" value="Embedded Gemini (hidden key)" readonly>
+      </div>
+      <div class="setting">
+        <label>Auto-analyze PDFs</label>
+        <input type="checkbox" id="autoAnalyze" checked>
+      </div>
+      <div class="setting">
+        <label>Max History Items</label>
+        <input type="number" id="maxHistory" value="50" min="10" max="500">
+      </div>
+      <div class="setting">
+        <label>Theme</label>
+        <select id="themeSelect">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button id="saveSettings" class="btn primary">Save</button>
+        <button id="closeSettings" class="btn secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>
