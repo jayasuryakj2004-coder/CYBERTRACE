@@ -4,6 +4,7 @@
 
 import { decodeLatin1 } from './pdfParser.js';
 import { inspectStructure, rawKeywordScan } from './structural.js';
+import { inspectIntake } from './intake.js';
 import { extractMetadata, extractMetadataViaPdfJs } from './metadata.js';
 import { computeRisk } from './risk.js';
 import { deduplicateFindings, validateFinding } from './evidence.js';
@@ -21,7 +22,9 @@ export async function analyzePdf(buffer, options = {}) {
     onProgress = null,
     pdfDoc = null,
     maxSize = 100 * 1024 * 1024,
-    signal = null
+    signal = null,
+    fileName = null,
+    declaredMimeType = null
   } = options;
 
   const result = {
@@ -29,6 +32,7 @@ export async function analyzePdf(buffer, options = {}) {
     progress: 0,
     metadata: null,
     structuralInfo: null,
+    fileIdentity: null,
     findings: [],
     riskAssessment: null,
     limitations: [],
@@ -50,6 +54,34 @@ export async function analyzePdf(buffer, options = {}) {
 
     const text = decodeLatin1(buffer);
 
+    // Intake phase: verify the declared file type against magic bytes and
+    // measure byte entropy before any structural inspection.
+    emitProgress(onProgress, 5, 'identity', 'Verifying file type and measuring entropy');
+    const intake = inspectIntake(buffer, { text, fileName, declaredMimeType });
+    result.fileIdentity = intake.info;
+    result.findings.push(...intake.findings);
+    result.progress = 10;
+
+    // An executable or archive container named/served as a PDF is a critical
+    // mismatch: report it and score it without attempting PDF-only parsing.
+    if (intake.info.blockingFormat) {
+      result.limitations.push(
+        `Uploaded bytes are a ${intake.info.detectedLabel}, not a PDF document; structural PDF inspection was skipped`
+      );
+      emitProgress(onProgress, 90, 'risk', 'Computing risk assessment');
+      const uniqueFindings = deduplicateFindings(result.findings);
+      const invalid = uniqueFindings.filter(f => !validateFinding(f).valid);
+      if (invalid.length > 0) {
+        result.limitations.push(`${invalid.length} finding(s) failed validation and were excluded`);
+      }
+      result.findings = uniqueFindings.filter(f => validateFinding(f).valid);
+      result.riskAssessment = computeRisk(result.findings);
+      result.progress = 100;
+      result.limitations.push(...collectLimitations(result.metadata, { entropy: result.fileIdentity }, result.findings));
+      result.status = ScanStatus.COMPLETED;
+      return result;
+    }
+
     if (!text.startsWith('%PDF-')) {
       throw new Error('Not a valid PDF: missing %PDF- header');
     }
@@ -66,7 +98,7 @@ export async function analyzePdf(buffer, options = {}) {
 
     emitProgress(onProgress, 40, 'structure', 'Inspecting document structure');
     const { findings: structuralFindings, structuralInfo } = inspectStructure(text);
-    result.structuralInfo = structuralInfo;
+    result.structuralInfo = { ...structuralInfo, entropy: result.fileIdentity };
     result.findings.push(...structuralFindings);
     result.progress = 60;
 
@@ -154,9 +186,13 @@ function keywordToRule(keyword) {
 
 function collectLimitations(metadata, structuralInfo, findings) {
   const limitations = [];
+  const entropy = structuralInfo?.entropy || metadata?.fileIdentity;
 
   if (metadata?.isEncrypted) {
     limitations.push('Document is encrypted; structural inspection is limited to unencrypted portions');
+  }
+  if (entropy && entropy.documentEntropy >= 7.5) {
+    limitations.push(`High entropy (${Number(entropy.documentEntropy).toFixed(2)} bits/byte); dense regions resist static inspection`);
   }
   if (structuralInfo?.hasObjectStreams) {
     limitations.push('Compressed object streams present; some objects may not be visible to the raw scanner');

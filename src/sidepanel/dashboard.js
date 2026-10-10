@@ -78,7 +78,6 @@ class Dashboard {
     this.applySettings();
     await this.loadCurrentScan();
     await this.renderHistory();
-    await this.loadAccuracy();
     this.setupMessages();
     try {
       const state = await chrome.runtime.sendMessage({ type: MessageType.GET_SCAN_STATE, payload: {} });
@@ -155,6 +154,18 @@ class Dashboard {
     $('docUrl').textContent = '—';
     $('scanStatusBadge').textContent = 'Waiting';
     $('scanCoverage').textContent = 'No analysis available';
+    $('mismatchAlert').classList.add('hidden');
+    $('docDetectedType').textContent = '—';
+    $('docMagicHex').textContent = '—';
+    $('docDeclaredMime').textContent = '—';
+    $('docSignatureStatus').textContent = '—';
+    $('docSignatureStatus').className = 'status-badge';
+    $('entropyValue').textContent = '—';
+    $('entropyLevel').textContent = '—';
+    $('entropyFill').style.width = '0%';
+    $('entropyStreams').textContent = '—';
+    $('entropyHighStreams').textContent = '—';
+    $('entropyMaxStream').textContent = '—';
   }
 
   renderScan() {
@@ -206,6 +217,7 @@ class Dashboard {
 
     this.renderFindings();
     this.renderRisk();
+    this.renderFileIdentity();
     this.renderLimitations();
     this.renderNextSteps();
     this.renderAiAnalysis();
@@ -275,6 +287,67 @@ class Dashboard {
       const points = typeof factor === 'object' && typeof factor.contribution === 'number' ? ` · +${factor.contribution}` : '';
       return `<div class="risk-factor"><span>${escapeHtml(label)}${escapeHtml(points)}</span></div>`;
     }).join('') : '<p class="empty">No risk factors identified.</p>';
+    const breakdown = risk.categoryBreakdown || {};
+    const entries = Object.entries(breakdown).filter(([, value]) => Number(value) > 0);
+    $('riskCategories').innerHTML = entries.length ? entries
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, value]) => `
+        <div class="risk-category">
+          <span class="risk-category-name">${escapeHtml(name.replace(/_/g, ' '))}</span>
+          <span class="risk-category-bar"><span style="width: ${Math.min(100, (Number(value) / 100) * 100)}%"></span></span>
+          <span class="risk-category-value">+${escapeHtml(Number(value).toFixed(2))}</span>
+        </div>`).join('')
+      : '<p class="empty">No category contributions recorded</p>';
+  }
+
+  renderFileIdentity() {
+    const identity = this.scan?.fileIdentity || null;
+    const alert = $('mismatchAlert');
+    if (!identity) {
+      alert.classList.add('hidden');
+      $('docDetectedType').textContent = '—';
+      $('docMagicHex').textContent = '—';
+      $('docDeclaredMime').textContent = '—';
+      $('docSignatureStatus').textContent = '—';
+      $('docSignatureStatus').className = 'status-badge';
+      $('entropyValue').textContent = '—';
+      $('entropyLevel').textContent = '—';
+      $('entropyLevel').className = 'entropy-level';
+      $('entropyFill').style.width = '0%';
+      $('entropyStreams').textContent = '—';
+      $('entropyHighStreams').textContent = '—';
+      $('entropyMaxStream').textContent = '—';
+      return;
+    }
+    $('docDetectedType').textContent = identity.detectedLabel || 'Not identified';
+    $('docMagicHex').textContent = identity.magicHex || '—';
+    $('docDeclaredMime').textContent = identity.declaredMimeType || identity.declaredExtension ? `${identity.declaredMimeType || 'unknown'}${identity.declaredExtension ? ` · .${identity.declaredExtension}` : ''}` : '—';
+    const signatureStatus = $('docSignatureStatus');
+    if (identity.blockingFormat) {
+      signatureStatus.textContent = 'Mismatch';
+      signatureStatus.className = 'status-badge failed';
+      alert.classList.remove('hidden');
+      $('mismatchAlertTitle').textContent = 'File-type mismatch detected';
+      $('mismatchAlertText').textContent = `This file was presented as a PDF but its magic bytes identify ${identity.detectedLabel}. Executable and archive content named as PDF is a common malware delivery technique — do not open it outside an isolated environment.`;
+    } else if (identity.isPdf) {
+      signatureStatus.textContent = identity.pdfOffset ? 'PDF with preamble' : 'Valid PDF';
+      signatureStatus.className = 'status-badge completed';
+      alert.classList.add('hidden');
+    } else {
+      signatureStatus.textContent = 'Not a PDF';
+      signatureStatus.className = 'status-badge incomplete';
+      alert.classList.add('hidden');
+    }
+    const entropy = Number.isFinite(identity.documentEntropy) ? identity.documentEntropy : 0;
+    $('entropyValue').textContent = `${entropy.toFixed(2)} bits/byte`;
+    const level = $('entropyLevel');
+    level.textContent = (identity.entropyLevel || 'low').toUpperCase();
+    level.className = `entropy-level ${escapeHtml(identity.entropyLevel || 'low')}`;
+    $('entropyFill').style.width = `${Math.min(100, (entropy / 8) * 100)}%`;
+    $('entropyFill').className = identity.entropyLevel === 'extreme' ? 'extreme' : identity.entropyLevel === 'high' ? 'high' : '';
+    $('entropyStreams').textContent = String(identity.streamCount ?? 0);
+    $('entropyHighStreams').textContent = String(identity.highEntropyStreams ?? 0);
+    $('entropyMaxStream').textContent = identity.streamCount ? `${Number(identity.maxStreamEntropy || 0).toFixed(2)} bits/byte` : '—';
   }
 
   renderLimitations() {
@@ -285,6 +358,15 @@ class Dashboard {
   renderNextSteps() {
     const findings = this.scan?.findings || [];
     const actions = [];
+    if (findings.some(f => f.detectionRule === 'FILE_TYPE_MISMATCH')) {
+      actions.push('This file is not a real PDF — treat it as untrusted executable/archive content and do not open it outside an isolated environment.');
+    }
+    if (findings.some(f => f.detectionRule === 'EMBEDDED_BINARY_SIGNATURE')) {
+      actions.push('An executable or archive signature was found inside the document bytes; inspect embedded payloads in a sandbox before any handling.');
+    }
+    if (findings.some(f => f.detectionRule === 'HIGH_ENTROPY')) {
+      actions.push('High entropy limits static inspection; consider dynamic analysis in a sandbox and verify the document source.');
+    }
     if (findings.length) actions.push('Review each finding and its object/evidence reference in the original document.');
     if (findings.some(f => ['javascript', 'launch_action', 'open_action', 'embedded_file'].includes(f.indicatorCategory))) {
       actions.push('If further analysis is warranted, inspect the document in an isolated, non-networked sandbox.');
@@ -468,9 +550,16 @@ class Dashboard {
     const result = await generatePdfReport(categorization, {
       fileName: scan.fileInfo?.name || 'document.pdf',
       sourceType: scan.fileInfo?.url ? (/^https?:/i.test(scan.fileInfo.url) ? 'remote' : 'local') : 'local',
+      sourceUrl: scan.fileInfo?.url || '',
       size: scan.fileInfo?.size || 0,
       sha256: scan.fileInfo?.sha256 || 'unknown',
-      mode: this.aiAnalysis ? 'Rules + AI' : 'Rules only'
+      scanId: scan.scanId || null,
+      timestamp: scan.timestamp || null,
+      completedAt: scan.completedAt || null,
+      mode: this.aiAnalysis ? 'Rules + AI' : 'Rules only',
+      limitations: (scan.limitations || []).slice(0, 12),
+      fileIdentity: scan.fileIdentity || null,
+      aiAnalysis: this.aiAnalysis || null
     });
     return result.pdfBytes;
   }
@@ -523,46 +612,6 @@ class Dashboard {
     $('autoAnalyze').checked = this.settings.autoAnalyze;
     $('maxHistory').value = this.settings.maxHistoryItems;
     $('themeSelect').value = this.settings.theme;
-  }
-
-  async loadAccuracy() {
-    try {
-      const response = await fetch(chrome.runtime.getURL('tests/results/evaluation.json'));
-      if (!response.ok) throw new Error('Evaluation output unavailable');
-      this.renderAccuracy(await response.json());
-    } catch {
-      $('accuracyContent').innerHTML = '<div class="empty-state"><p>Evaluation results are unavailable. Run the Phase 2 evaluation harness to generate results.</p></div>';
-    }
-  }
-
-  renderAccuracy(evaluation) {
-    const metrics = evaluation.metrics || {};
-    const counts = metrics.confusionMatrix || {};
-    const observedLabels = (evaluation.samples || []).reduce((result, sample) => {
-      result[sample.label] = (result[sample.label] || 0) + 1;
-      return result;
-    }, {});
-    const labels = evaluation.dataset?.labelDistribution || observedLabels;
-    const sampleStatuses = (evaluation.samples || []).reduce((result, sample) => {
-      result[sample.scanStatus] = (result[sample.scanStatus] || 0) + 1;
-      return result;
-    }, {});
-    const formatMetric = value => typeof value === 'number' ? `${(value * 100).toFixed(1)}%` : 'Not defined';
-    const indicatorRows = Object.entries(evaluation.perIndicator || {}).map(([name, item]) => `
-      <tr><th>${escapeHtml(name.replace(/_/g, ' '))}</th><td>${item.tp}</td><td>${item.fp}</td><td>${item.fn}</td><td>${formatMetric(item.precision)}</td><td>${formatMetric(item.recall)}</td><td>${formatMetric(item.f1Score)}</td></tr>`).join('');
-    $('accuracyContent').innerHTML = `<p class="accuracy-provenance">Dataset: ${escapeHtml(evaluation.dataset?.name || 'CyberTrace labeled fixture dataset')} v${escapeHtml(evaluation.dataset?.version || 'unknown')} · ${escapeHtml(evaluation.dataset?.provenance || 'Provenance not recorded')} · Evaluated: ${escapeHtml(this.formatDate(evaluation.timestamp))} · Threshold: ${escapeHtml(evaluation.threshold)}</p>
-      <p class="accuracy-note">These metrics describe the deterministic scanner on this labeled dataset; they do not measure AI explanation quality.</p>
-      <div class="metric-grid">${[
-        ['Dataset size', `${evaluation.datasetSize ?? metrics.totalSamples ?? 0}`],
-        ['Label distribution', `Benign ${labels.benign || 0} · Suspicious ${labels.suspicious || 0} · Unknown ${labels.unknown || 0}`],
-        ['Completed / attempted', `${sampleStatuses.completed || 0} / ${(evaluation.samples || []).length}`],
-        ['Precision', formatMetric(metrics.precision)], ['Recall', formatMetric(metrics.recall)],
-        ['F1', formatMetric(metrics.f1Score)], ['Accuracy', formatMetric(metrics.accuracy)],
-        ['False-positive rate', formatMetric(metrics.falsePositiveRate)],
-        ['TP / TN / FP / FN', `${counts.tp ?? 0} / ${counts.tn ?? 0} / ${counts.fp ?? 0} / ${counts.fn ?? 0}`],
-        ['Incomplete / failed scans', `${metrics.incompleteScans ?? 0} / ${metrics.failedScans ?? 0}`]
-      ].map(([label, value]) => `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join('')}</div>
-      <h3>Indicator-level results</h3><div class="table-scroll"><table class="metrics-table"><thead><tr><th>Indicator</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead><tbody>${indicatorRows || '<tr><td colspan="7">No indicator-level results recorded.</td></tr>'}</tbody></table></div>`;
   }
 
   activateTab(name) {

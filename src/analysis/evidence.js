@@ -14,7 +14,8 @@ export const DetectionMethod = {
   OBJECT_PARSER: 'object_parser',
   RAW_SCAN: 'raw_scan',
   HASH: 'hash',
-  MANUAL: 'manual'
+  MANUAL: 'manual',
+  SIGNATURE: 'magic_bytes'
 };
 
 export const IndicatorCategory = {
@@ -32,7 +33,9 @@ export const IndicatorCategory = {
   INCREMENTAL_UPDATE: 'incremental_update',
   FORM: 'form',
   SIGNATURE: 'signature',
-  TEXT_CONTENT: 'text_content'
+  TEXT_CONTENT: 'text_content',
+  ENTROPY_ANOMALY: 'entropy_anomaly',
+  FILE_TYPE_MISMATCH: 'file_type_mismatch'
 };
 
 let findingCounter = 0;

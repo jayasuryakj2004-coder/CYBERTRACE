@@ -49,6 +49,7 @@ export function createScanResult(overrides = {}) {
     },
     status: overrides.status || ScanStatus.QUEUED,
     progress: overrides.progress || 0,
+    fileIdentity: overrides.fileIdentity || null,
     findings: overrides.findings || [],
     metadata: overrides.metadata || {
       pageCount: 0,

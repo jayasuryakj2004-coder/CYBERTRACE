@@ -152,6 +152,46 @@ export const RULES = {
     categoryCap: 0,
     description: 'AcroForm present',
     explanation: 'Forms are common in legitimate documents. Form fields can host JavaScript, which is flagged separately.'
+  },
+  HIGH_ENTROPY: {
+    id: 'R-EN-002',
+    name: 'high_entropy',
+    indicatorCategory: IndicatorCategory.ENTROPY_ANOMALY,
+    severity: Severity.MEDIUM,
+    weight: 18,
+    categoryCap: 25,
+    description: 'High Shannon byte entropy detected',
+    explanation: 'High entropy indicates encrypted, compressed, or packed content that resists static inspection. Such content can hide malicious payloads or deliberately lock the document against analysis. Image-heavy or legitimately compressed PDFs also produce high entropy, so this is an indicator, not proof of maliciousness.'
+  },
+  FILE_TYPE_MISMATCH: {
+    id: 'R-FT-001',
+    name: 'file_type_mismatch',
+    indicatorCategory: IndicatorCategory.FILE_TYPE_MISMATCH,
+    severity: Severity.CRITICAL,
+    weight: 45,
+    categoryCap: 60,
+    description: 'Declared file type does not match magic-byte signature',
+    explanation: 'The file was presented as a PDF but its magic bytes identify an executable or archive container. Masquerading executable or archive content as a PDF is a common malware delivery technique; viewers that trust the extension may be tricked into processing it.'
+  },
+  EMBEDDED_BINARY_SIGNATURE: {
+    id: 'R-FT-002',
+    name: 'embedded_binary_signature',
+    indicatorCategory: IndicatorCategory.FILE_TYPE_MISMATCH,
+    severity: Severity.HIGH,
+    weight: 25,
+    categoryCap: 35,
+    description: 'Executable or archive signature embedded inside document bytes',
+    explanation: 'A PE, ZIP, RAR or 7-Zip signature was found inside the document bytes. Polyglot files can hide payloads from parsers that only inspect the outer container.'
+  },
+  PDF_PREAMBLE: {
+    id: 'R-FT-003',
+    name: 'pdf_preamble',
+    indicatorCategory: IndicatorCategory.FILE_TYPE_MISMATCH,
+    severity: Severity.INFO,
+    weight: 0,
+    categoryCap: 0,
+    description: 'PDF header preceded by non-PDF preamble bytes',
+    explanation: 'The %PDF- header was found after a leading preamble. This is often harmless (BOM or junk prefix) but can also indicate a wrapper or polyglot file.'
   }
 };
 

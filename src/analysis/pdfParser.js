@@ -247,3 +247,240 @@ export function extractActionObjects(objects) {
   }
   return actions;
 }
+
+/**
+ * Calculates Shannon byte entropy for a buffer or Uint8Array.
+ * Returns a value between 0.0 and 8.0 bits per byte.
+ */
+export function calculateShannonEntropy(buffer) {
+  if (!buffer) return 0;
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  if (bytes.length === 0) return 0;
+
+  const frequencies = new Uint32Array(256);
+  for (let i = 0; i < bytes.length; i++) {
+    frequencies[bytes[i]]++;
+  }
+
+  let entropy = 0;
+  const total = bytes.length;
+  for (let i = 0; i < 256; i++) {
+    if (frequencies[i] > 0) {
+      const p = frequencies[i] / total;
+      entropy -= p * Math.log2(p);
+    }
+  }
+  return Math.round(entropy * 100) / 100;
+}
+
+/**
+ * Inspects initial bytes (magic bytes) to identify file type and signature mismatches.
+ */
+export function detectFileSignature(buffer) {
+  if (!buffer || buffer.byteLength === 0) {
+    return { format: 'empty', label: 'Empty File', isPdf: false, isExecutable: false, isArchive: false, magicHex: '' };
+  }
+
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  const len = bytes.length;
+  const magicHex = Array.from(bytes.subarray(0, Math.min(8, len)))
+    .map(b => b.toString(16).padStart(2, '0').toUpperCase())
+    .join(' ');
+
+  // 1. Standard PDF magic header: %PDF- (0x25 0x50 0x44 0x46 0x2D)
+  if (len >= 5 && bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 && bytes[4] === 0x2D) {
+    return {
+      format: 'pdf',
+      label: 'PDF Document (ISO 32000-1)',
+      mime: 'application/pdf',
+      isPdf: true,
+      isExecutable: false,
+      isArchive: false,
+      magicHex
+    };
+  }
+
+  // Check if %PDF- appears within the first 1024 bytes (with small preamble or BOM)
+  const preambleLimit = Math.min(1024, len);
+  let pdfOffset = -1;
+  for (let i = 0; i <= preambleLimit - 5; i++) {
+    if (bytes[i] === 0x25 && bytes[i + 1] === 0x50 && bytes[i + 2] === 0x44 && bytes[i + 3] === 0x46 && bytes[i + 4] === 0x2D) {
+      pdfOffset = i;
+      break;
+    }
+  }
+
+  // 2. Windows Portable Executable (PE / MZ): 0x4D 0x5A ("MZ")
+  if (len >= 2 && bytes[0] === 0x4D && bytes[1] === 0x5A) {
+    return {
+      format: 'pe_executable',
+      label: 'Windows Executable / DLL (PE/MZ)',
+      mime: 'application/vnd.microsoft.portable-executable',
+      isPdf: false,
+      isExecutable: true,
+      isArchive: false,
+      magicHex,
+      pdfOffset
+    };
+  }
+
+  // 3. Linux/Unix ELF Executable: 0x7F 0x45 0x4C 0x46 ("\x7FELF")
+  if (len >= 4 && bytes[0] === 0x7F && bytes[1] === 0x45 && bytes[2] === 0x4C && bytes[3] === 0x46) {
+    return {
+      format: 'elf_executable',
+      label: 'Linux/Unix ELF Binary Executable',
+      mime: 'application/x-executable',
+      isPdf: false,
+      isExecutable: true,
+      isArchive: false,
+      magicHex,
+      pdfOffset
+    };
+  }
+
+  // 4. Mach-O Executables & Universal Binaries
+  if (len >= 4) {
+    const isMacho = (
+      (bytes[0] === 0xFE && bytes[1] === 0xED && bytes[2] === 0xFA && (bytes[3] === 0xCE || bytes[3] === 0xCF)) ||
+      (bytes[0] === 0xCE && bytes[1] === 0xFA && bytes[2] === 0xED && bytes[3] === 0xFE) ||
+      (bytes[0] === 0xCF && bytes[1] === 0xFA && bytes[2] === 0xED && bytes[3] === 0xFE) ||
+      (bytes[0] === 0xCA && bytes[1] === 0xFE && bytes[2] === 0xBA && bytes[3] === 0xBE)
+    );
+    if (isMacho) {
+      return {
+        format: 'macho_executable',
+        label: 'Mach-O Binary / Java Bytecode Executable',
+        mime: 'application/x-mach-binary',
+        isPdf: false,
+        isExecutable: true,
+        isArchive: false,
+        magicHex,
+        pdfOffset
+      };
+    }
+  }
+
+  // 5. ZIP Archive / Android Package (APK) / JAR: 0x50 0x4B 0x03 0x04 or 0x50 0x4B 0x05 0x06
+  if (len >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4B && (
+    (bytes[2] === 0x03 && bytes[3] === 0x04) ||
+    (bytes[2] === 0x05 && bytes[3] === 0x06) ||
+    (bytes[2] === 0x07 && bytes[3] === 0x08)
+  )) {
+    return {
+      format: 'zip_apk_archive',
+      label: 'ZIP Archive / Android APK Package / JAR Container',
+      mime: 'application/zip',
+      isPdf: false,
+      isExecutable: false,
+      isArchive: true,
+      magicHex,
+      pdfOffset
+    };
+  }
+
+  // 6. RAR Archive: 0x52 0x61 0x72 0x21 0x1A 0x07 ("Rar!\x1A\x07")
+  if (len >= 6 && bytes[0] === 0x52 && bytes[1] === 0x61 && bytes[2] === 0x72 && bytes[3] === 0x21 && bytes[4] === 0x1A && bytes[5] === 0x07) {
+    return {
+      format: 'rar_archive',
+      label: 'RAR Compressed Archive Container',
+      mime: 'application/vnd.rar',
+      isPdf: false,
+      isExecutable: false,
+      isArchive: true,
+      magicHex,
+      pdfOffset
+    };
+  }
+
+  // 7. 7-Zip Archive: 0x37 0x7A 0xBC 0xAF 0x27 0x1C ("7z\xBC\xAF\x27\x1C")
+  if (len >= 6 && bytes[0] === 0x37 && bytes[1] === 0x7A && bytes[2] === 0xBC && bytes[3] === 0xAF && bytes[4] === 0x27 && bytes[5] === 0x1C) {
+    return {
+      format: '7z_archive',
+      label: '7-Zip Compressed Archive Container',
+      mime: 'application/x-7z-compressed',
+      isPdf: false,
+      isExecutable: false,
+      isArchive: true,
+      magicHex,
+      pdfOffset
+    };
+  }
+
+  // 8. GZIP Compressed Archive: 0x1F 0x8B
+  if (len >= 2 && bytes[0] === 0x1F && bytes[1] === 0x8B) {
+    return {
+      format: 'gzip_archive',
+      label: 'GZIP Compressed Archive',
+      mime: 'application/gzip',
+      isPdf: false,
+      isExecutable: false,
+      isArchive: true,
+      magicHex,
+      pdfOffset
+    };
+  }
+
+  // 9. If %PDF- was found with preamble
+  if (pdfOffset > 0) {
+    return {
+      format: 'pdf_with_preamble',
+      label: `PDF Document (with leading preamble offset +${pdfOffset})`,
+      mime: 'application/pdf',
+      isPdf: true,
+      isExecutable: false,
+      isArchive: false,
+      magicHex,
+      pdfOffset
+    };
+  }
+
+  // 10. Unknown / non-PDF format
+  return {
+    format: 'unknown',
+    label: 'Unknown Non-PDF Binary / Plaintext',
+    mime: 'application/octet-stream',
+    isPdf: false,
+    isExecutable: false,
+    isArchive: false,
+    magicHex
+  };
+}
+
+/**
+ * Scans a PDF buffer for polyglot or embedded executable/archive headers.
+ */
+export function detectEmbeddedSignatures(buffer) {
+  if (!buffer || buffer.byteLength < 32) return [];
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  const hits = [];
+
+  // Look for embedded PE executable ("MZ" with PE pointer)
+  for (let i = 1; i <= bytes.length - 64; i++) {
+    if (bytes[i] === 0x4D && bytes[i + 1] === 0x5A) { // "MZ"
+      const peOffset = i + 60 < bytes.length ? bytes[i + 60] | (bytes[i + 61] << 8) : 0;
+      if (peOffset > 0 && i + peOffset + 4 <= bytes.length) {
+        if (bytes[i + peOffset] === 0x50 && bytes[i + peOffset + 1] === 0x45 && bytes[i + peOffset + 2] === 0x00 && bytes[i + peOffset + 3] === 0x00) {
+          hits.push({ type: 'pe_executable', offset: i, label: 'Embedded Windows PE Executable' });
+        }
+      }
+    }
+  }
+
+  // Look for embedded ZIP / APK (PK\x03\x04)
+  for (let i = 1; i <= bytes.length - 30; i++) {
+    if (bytes[i] === 0x50 && bytes[i + 1] === 0x4B && bytes[i + 2] === 0x03 && bytes[i + 3] === 0x04) {
+      hits.push({ type: 'zip_archive', offset: i, label: 'Embedded ZIP/APK Container' });
+      break; // report at most one
+    }
+  }
+
+  // Look for embedded 7-Zip (7z\xBC\xAF\x27\x1C)
+  for (let i = 1; i <= bytes.length - 6; i++) {
+    if (bytes[i] === 0x37 && bytes[i + 1] === 0x7A && bytes[i + 2] === 0xBC && bytes[i + 3] === 0xAF && bytes[i + 4] === 0x27 && bytes[i + 5] === 0x1C) {
+      hits.push({ type: '7z_archive', offset: i, label: 'Embedded 7-Zip Container' });
+      break;
+    }
+  }
+
+  return hits;
+}

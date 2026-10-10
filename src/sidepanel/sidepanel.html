@@ -37,11 +37,17 @@
     <button class="tab-btn" data-tab="risk">Risk</button>
     <button class="tab-btn" data-tab="ai">AI Analyst</button>
     <button class="tab-btn" data-tab="history">History</button>
-    <button class="tab-btn" data-tab="accuracy">Accuracy</button>
   </div>
 
   <main class="dashboard-content">
     <section id="tab-overview" class="tab-panel active">
+      <div id="mismatchAlert" class="alert alert-danger hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+        <div>
+          <strong id="mismatchAlertTitle">File-type mismatch detected</strong>
+          <span id="mismatchAlertText"></span>
+        </div>
+      </div>
       <div class="grid-2">
         <div class="card">
           <h2>Document</h2>
@@ -51,6 +57,31 @@
             <dt>SHA-256</dt><dd id="docHash" class="mono">—</dd>
             <dt>Source</dt><dd id="docUrl" class="url">—</dd>
           </dl>
+        </div>
+        <div class="card">
+          <h2>File Identity</h2>
+          <dl class="info-list">
+            <dt>Detected type</dt><dd id="docDetectedType">—</dd>
+            <dt>Magic bytes</dt><dd id="docMagicHex" class="mono">—</dd>
+            <dt>Declared MIME</dt><dd id="docDeclaredMime">—</dd>
+            <dt>Signature check</dt><dd><span id="docSignatureStatus" class="status-badge">—</span></dd>
+          </dl>
+        </div>
+        <div class="card">
+          <h2>Entropy Analysis</h2>
+          <div class="entropy-display">
+            <div class="entropy-header">
+              <span id="entropyValue" class="entropy-value">—</span>
+              <span id="entropyLevel" class="entropy-level">—</span>
+            </div>
+            <div class="entropy-meter"><div id="entropyFill"></div></div>
+            <dl class="info-list">
+              <dt>Streams scanned</dt><dd id="entropyStreams">—</dd>
+              <dt>High-entropy streams</dt><dd id="entropyHighStreams">—</dd>
+              <dt>Max stream entropy</dt><dd id="entropyMaxStream">—</dd>
+            </dl>
+            <p class="entropy-note">Shannon byte entropy (0–8 bits/byte). Values above 7.5 indicate locked, packed, or encrypted content that resists static inspection.</p>
+          </div>
         </div>
         <div class="card">
           <h2>Scan Status</h2>
@@ -150,6 +181,12 @@
           <p class="risk-disclaimer">Indicators are observations, not confirmation of malicious behavior. CyberTrace does not block documents.</p>
         </div>
         <div class="card full-width">
+          <h2>Indicator Category Breakdown</h2>
+          <div id="riskCategories" class="risk-categories">
+            <p class="empty">No category contributions recorded</p>
+          </div>
+        </div>
+        <div class="card full-width">
           <h2>Rule Weights</h2>
           <div id="ruleWeights" class="rule-weights"></div>
         </div>
@@ -241,17 +278,6 @@
       </div>
     </section>
 
-    <section id="tab-accuracy" class="tab-panel">
-      <div class="card full-width">
-        <h2>Evaluation Metrics</h2>
-        <div id="accuracyContent" class="accuracy-content">
-          <div class="empty-state">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-            <p>Loading evaluation results...</p>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
 
   <footer class="dashboard-footer">

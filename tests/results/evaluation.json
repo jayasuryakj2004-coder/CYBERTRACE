@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-09T12:58:22.637Z",
+  "timestamp": "2026-10-09T23:32:44.754Z",
   "threshold": 50,
   "datasetSize": 15,
   "dataset": {
@@ -189,7 +189,7 @@
       "notes": "PDF with a legitimate external HTTPS link. Links are common and benign.",
       "sha256": "1cccc65ef4ec3d6d62c480cbb10fcb4a4500dcccd10ea21d5846998e8d3a0cfe",
       "riskScore": 1.35,
-      "riskLevel": "none",
+      "riskLevel": "low",
       "detectedFindings": [
         {
           "findingId": "F-0002",
@@ -275,7 +275,7 @@
       "notes": "PDF with a /JavaScript action auto-triggered via /OpenAction. JavaScript is a strong indicator but not proof of malware.",
       "sha256": "6a58e80fef25a7354953cbd217650528033f2b25223c1c731c29a7f12b3c05f9",
       "riskScore": 59.56,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "detectedFindings": [
         {
           "findingId": "F-0006",
@@ -321,7 +321,7 @@
       "notes": "PDF with /OpenAction triggering a JavaScript action on open.",
       "sha256": "6f2394d3306f63d4b69b1029a74c1338196f1314d75ab9fd6db9185e21a20d33",
       "riskScore": 59.56,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "detectedFindings": [
         {
           "findingId": "F-0009",
@@ -368,7 +368,7 @@
       "notes": "PDF with an embedded file attachment (/EmbeddedFiles, /Filespec) and auto-executing JavaScript via /OpenAction.",
       "sha256": "1f03fe03d55606b618f42de8f6e2cf1ed8d72723afb390191bf31925b0ee7736",
       "riskScore": 74.56,
-      "riskLevel": "high",
+      "riskLevel": "critical",
       "detectedFindings": [
         {
           "findingId": "F-0012",
@@ -431,7 +431,7 @@
       "notes": "PDF with a /Launch action auto-triggered via /OpenAction. Strong indicator; modern viewers block execution.",
       "sha256": "857c0657485185642b7064df50fe902ccfa14db063dbefd176d34601ce1d23ad",
       "riskScore": 75,
-      "riskLevel": "high",
+      "riskLevel": "critical",
       "detectedFindings": [
         {
           "findingId": "F-0017",
@@ -572,7 +572,7 @@
       "notes": "PDF with /AA additional actions containing JavaScript.",
       "sha256": "c9077d7c26bb23a7c05355669973f54004ce034aa222b0e0a8965bf147eac6b6",
       "riskScore": 56.86,
-      "riskLevel": "medium",
+      "riskLevel": "high",
       "detectedFindings": [
         {
           "findingId": "F-0029",
@@ -660,7 +660,7 @@
       "notes": "Encrypted PDF (/Encrypt in trailer). Structural inspection is limited; label is unknown.",
       "sha256": "08faeab69491beedf6618364b2c6a2e339ab309d87a77597bc7ca45904cb1dc9",
       "riskScore": 3.56,
-      "riskLevel": "none",
+      "riskLevel": "low",
       "detectedFindings": [
         {
           "findingId": "F-0033",
@@ -724,7 +724,7 @@
       "notes": "PDF with incremental update (two %%EOF markers) and a link annotation in the second revision. Common from editors; benign.",
       "sha256": "bd85e43995028c2d6d54434e287f33c1191cc8ecd226dee472a640c64d4a0dcc",
       "riskScore": 4.05,
-      "riskLevel": "none",
+      "riskLevel": "low",
       "detectedFindings": [
         {
           "findingId": "F-0036",
