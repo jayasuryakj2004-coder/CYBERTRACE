@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#2456A6"/>
+    </marker>
+    <marker id="arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#B34A12"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="700" fill="#ffffff"/>
+  <text x="500" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#16233F">CyberTrace — Solution Architecture</text>
+  <text x="500" y="52" text-anchor="middle" font-size="12" fill="#5A6577">Static forensic analysis pipeline with optional AI-assisted interpretation</text>
+
+  <g>
+    <rect x="30" y="80" width="140" height="130" rx="8" fill="#ffffff" stroke="#2456A6" stroke-width="1.5"/>
+    <text x="100" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#16233F">PDF Sources</text>
+    <line x1="42" y1="112" x2="158" y2="112" stroke="#C7D0DC" stroke-width="1"/>
+    <text x="100" y="133" text-anchor="middle" font-size="11" fill="#333F50">Remote (HTTP/HTTPS)</text>
+    <text x="100" y="153" text-anchor="middle" font-size="11" fill="#333F50">Local (file://)</text>
+    <text x="100" y="173" text-anchor="middle" font-size="11" fill="#333F50">Drag-and-drop upload</text>
+  </g>
+
+  <g>
+    <rect x="220" y="80" width="150" height="130" rx="8" fill="#ffffff" stroke="#2456A6" stroke-width="1.5"/>
+    <text x="295" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#16233F">Content Script</text>
+    <line x1="232" y1="112" x2="358" y2="112" stroke="#C7D0DC" stroke-width="1"/>
+    <text x="295" y="133" text-anchor="middle" font-size="11" fill="#333F50">Navigation detection</text>
+    <text x="295" y="153" text-anchor="middle" font-size="11" fill="#333F50">Auto-start analysis</text>
+    <text x="295" y="173" text-anchor="middle" font-size="11" fill="#333F50">Declares file name / type</text>
+  </g>
+
+  <g>
+    <rect x="420" y="80" width="170" height="130" rx="8" fill="#ffffff" stroke="#2456A6" stroke-width="1.5"/>
+    <text x="505" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#16233F">Background</text>
+    <text x="505" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#16233F">Service Worker</text>
+    <line x1="432" y1="125" x2="578" y2="125" stroke="#C7D0DC" stroke-width="1"/>
+    <text x="505" y="146" text-anchor="middle" font-size="11" fill="#333F50">Byte fetch (CORS proxy)</text>
+    <text x="505" y="166" text-anchor="middle" font-size="11" fill="#333F50">SHA-256 digest</text>
+    <text x="505" y="186" text-anchor="middle" font-size="11" fill="#333F50">Progress orchestration</text>
+  </g>
+
+  <path d="M170 145 H214" stroke="#2456A6" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <path d="M370 145 H414" stroke="#2456A6" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <path d="M590 145 H634" stroke="#2456A6" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+  <g>
+    <rect x="640" y="70" width="330" height="260" rx="8" fill="#F7FAFD" stroke="#16233F" stroke-width="1.5"/>
+    <text x="805" y="94" text-anchor="middle" font-size="13" font-weight="700" fill="#16233F">Analysis Engine</text>
+
+    <rect x="655" y="106" width="300" height="46" rx="6" fill="#E8EEF7" stroke="#9FB6D9" stroke-width="1.5"/>
+    <text x="667" y="125" font-size="12" font-weight="700" fill="#16233F">Intake — Magic Bytes + Entropy</text>
+    <text x="667" y="141" font-size="10.5" fill="#333F50">File-type mismatch &amp; high-entropy detection (new)</text>
+    <rect x="913" y="111" width="32" height="15" rx="3" fill="#2456A6"/>
+    <text x="929" y="122" text-anchor="middle" font-size="8.5" font-weight="700" fill="#ffffff">NEW</text>
+
+    <rect x="655" y="160" width="300" height="46" rx="6" fill="#ffffff" stroke="#C7D0DC" stroke-width="1.5"/>
+    <text x="667" y="179" font-size="12" font-weight="700" fill="#16233F">Metadata Extraction</text>
+    <text x="667" y="195" font-size="10.5" fill="#333F50">Producer, creator, dates, page and object counts</text>
+
+    <rect x="655" y="214" width="300" height="46" rx="6" fill="#ffffff" stroke="#C7D0DC" stroke-width="1.5"/>
+    <text x="667" y="233" font-size="12" font-weight="700" fill="#16233F">Structural Inspection</text>
+    <text x="667" y="249" font-size="10.5" fill="#333F50">Objects, streams, xref, incremental updates, EOF</text>
+
+    <rect x="655" y="268" width="300" height="46" rx="6" fill="#ffffff" stroke="#C7D0DC" stroke-width="1.5"/>
+    <text x="667" y="287" font-size="12" font-weight="700" fill="#16233F">Indicator Detection</text>
+    <text x="667" y="303" font-size="10.5" fill="#333F50">JavaScript, auto-open, URI launch, embedded payloads</text>
+  </g>
+
+  <path d="M805 330 V364" stroke="#2456A6" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+  <g>
+    <rect x="640" y="370" width="330" height="100" rx="8" fill="#ffffff" stroke="#2456A6" stroke-width="1.5"/>
+    <text x="805" y="394" text-anchor="middle" font-size="13" font-weight="700" fill="#16233F">Risk Engine — Weighted Rule Scoring</text>
+    <line x1="652" y1="403" x2="958" y2="403" stroke="#C7D0DC" stroke-width="1"/>
+    <text x="805" y="423" text-anchor="middle" font-size="11" fill="#333F50">Weighted, capped rules produce a 0–100 score</text>
+    <text x="805" y="441" text-anchor="middle" font-size="11" fill="#333F50">Bands: LOW / MEDIUM / HIGH / CRITICAL</text>
+    <text x="805" y="459" text-anchor="middle" font-size="11" fill="#333F50">Every finding traceable to raw evidence</text>
+  </g>
+
+  <path d="M805 470 V504" stroke="#2456A6" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+  <g>
+    <rect x="640" y="510" width="330" height="100" rx="8" fill="#ffffff" stroke="#2456A6" stroke-width="1.5"/>
+    <text x="805" y="534" text-anchor="middle" font-size="13" font-weight="700" fill="#16233F">Sidepanel Dashboard</text>
+    <line x1="652" y1="543" x2="958" y2="543" stroke="#C7D0DC" stroke-width="1"/>
+    <text x="805" y="561" text-anchor="middle" font-size="11" fill="#333F50">Overview · Findings · Risk · AI Analyst · History</text>
+    <text x="805" y="579" text-anchor="middle" font-size="11" fill="#333F50">File Identity card · Entropy meter · Mismatch alert</text>
+    <text x="805" y="597" text-anchor="middle" font-size="11" fill="#333F50">Scan history with one-click reload</text>
+  </g>
+
+  <path d="M805 610 V634" stroke="#2456A6" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+  <g>
+    <rect x="640" y="640" width="330" height="50" rx="8" fill="#16233F" stroke="#16233F" stroke-width="1.5"/>
+    <text x="805" y="660" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Export — Digital Forensics Case Report</text>
+    <text x="805" y="677" text-anchor="middle" font-size="10.5" fill="#C7D0DC">Multi-page PDF: case info, evidence, chain of custody</text>
+  </g>
+
+  <path d="M505 210 V625 H434" stroke="#2456A6" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <text x="512" y="320" font-size="10" fill="#5A6577">scan history</text>
+
+  <path d="M640 420 H340 V479" stroke="#B34A12" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#arrD)"/>
+  <text x="452" y="412" font-size="10" fill="#8F6400">findings</text>
+
+  <g>
+    <rect x="30" y="485" width="400" height="70" rx="8" fill="#FFFDF5" stroke="#B34A12" stroke-width="1.5" stroke-dasharray="6 4"/>
+    <text x="230" y="508" text-anchor="middle" font-size="13" font-weight="700" fill="#16233F">Optional AI Layer — Gemini API</text>
+    <text x="230" y="528" text-anchor="middle" font-size="11" fill="#333F50">AI-assisted interpretation grounded strictly in scanner evidence</text>
+    <text x="230" y="545" text-anchor="middle" font-size="11" fill="#333F50">Never invents findings; inactive when no API key is configured</text>
+  </g>
+
+  <g>
+    <rect x="30" y="595" width="400" height="70" rx="8" fill="#ffffff" stroke="#2456A6" stroke-width="1.5"/>
+    <text x="230" y="618" text-anchor="middle" font-size="12" font-weight="700" fill="#16233F">Local Storage — chrome.storage.local</text>
+    <text x="230" y="638" text-anchor="middle" font-size="11" fill="#333F50">Scan history and extension settings</text>
+    <text x="230" y="655" text-anchor="middle" font-size="11" fill="#333F50">Persisted file identity and risk state</text>
+  </g>
+
+  <g font-size="10" fill="#5A6577">
+    <line x1="30" y1="690" x2="58" y2="690" stroke="#2456A6" stroke-width="1.5"/>
+    <text x="64" y="693">data flow</text>
+    <line x1="130" y1="690" x2="158" y2="690" stroke="#B34A12" stroke-width="1.5" stroke-dasharray="6 4"/>
+    <text x="164" y="693">optional AI path</text>
+  </g>
+</svg>

@@ -207,6 +207,7 @@ async function startAnalysis(scanId) {
     scanResult.status = analysis.status;
     scanResult.progress = analysis.progress;
     scanResult.metadata = analysis.metadata;
+    scanResult.fileIdentity = analysis.fileIdentity;
     scanResult.findings = analysis.findings;
     scanResult.riskAssessment = analysis.riskAssessment;
     scanResult.limitations = analysis.limitations;
@@ -250,6 +251,8 @@ async function runAnalysis(scanId, scanResult, pdfBuffer, abortController) {
     analysis = await analyzePdf(pdfBuffer, {
       onProgress,
       pdfDoc,
+      fileName: scanResult.fileInfo?.name || null,
+      declaredMimeType: scanResult.fileInfo?.mimeType || null,
       signal: abortController.signal
     });
   } finally {
@@ -260,6 +263,7 @@ async function runAnalysis(scanId, scanResult, pdfBuffer, abortController) {
     status: analysis.status,
     progress: analysis.progress,
     metadata: mapMetadata(analysis.metadata, analysis.findings),
+    fileIdentity: analysis.fileIdentity,
     findings: analysis.findings,
     riskAssessment: analysis.riskAssessment,
     limitations: [...analysis.limitations, ...pdfJsLimitations],
